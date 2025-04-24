@@ -52,9 +52,8 @@ toggleButton.TextSize = 16
 toggleButton.BackgroundColor3 = disabledColor
 toggleButton.TextColor3 = textColor
 
--- Variables for wallhop and jump tracking
+-- Variables for wallhop
 local wallhopEnabled = false
-local jumpQueue = 0 -- Tracks how many jumps should occur
 
 -- Detect walls
 local function detectWall()
@@ -78,7 +77,7 @@ end
 -- Perform wall hop or jump
 local function performWallHop()
     local character = LocalPlayer.Character
-    if not character or jumpQueue <= 0 then return end
+    if not character then return end
 
     local rootPart = character:FindFirstChild("HumanoidRootPart")
     local humanoid = character:FindFirstChildOfClass("Humanoid")
@@ -97,23 +96,20 @@ local function performWallHop()
 
         -- Apply controlled velocity
         rootPart.Velocity = rootPart.Velocity + Vector3.new(0, upwardForce, 0) + sidewaysBoost
-        jumpQueue = jumpQueue - 1 -- Decrease the jump queue by 1
     end
 end
 
 -- Handle jump input
 UserInputService.InputBegan:Connect(function(input, isProcessed)
     if input.KeyCode == Enum.KeyCode.Space and wallhopEnabled and not isProcessed then
-        jumpQueue = jumpQueue + 1 -- Add a jump to the queue
-        performWallHop() -- Perform the jump immediately
+        performWallHop() -- Perform the jump only when the button is pressed
     end
 end)
 
 -- Mobile support for jump input
 UserInputService.TouchTap:Connect(function()
     if wallhopEnabled then
-        jumpQueue = jumpQueue + 1 -- Add a jump to the queue
-        performWallHop() -- Perform the jump immediately
+        performWallHop() -- Perform the jump only when the screen is tapped
     end
 end)
 
