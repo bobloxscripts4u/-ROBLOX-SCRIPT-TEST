@@ -3,10 +3,8 @@ local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
--- Configuration for jump and wall hop
-local maxWallDistance = 4 -- Maximum distance to detect a wall
-local upwardForce = 30 -- Adjusted upward velocity for controlled jumps
-local sidewaysForce = 10 -- Sideways velocity for realistic wall hops
+-- Configuration
+local upwardForce = 50 -- Upward velocity for jumps
 
 -- UI Colors
 local enabledColor = Color3.fromRGB(85, 255, 85) -- Green when enabled
@@ -14,11 +12,11 @@ local disabledColor = Color3.fromRGB(255, 85, 85) -- Red when disabled
 local textColor = Color3.fromRGB(255, 255, 255) -- White text
 
 -- Remove old UI if it exists
-pcall(function() CoreGui:FindFirstChild("WallhopUI"):Destroy() end)
+pcall(function() CoreGui:FindFirstChild("InfiniteJumpUI"):Destroy() end)
 
 -- Create UI
 local screenGui = Instance.new("ScreenGui", CoreGui)
-screenGui.Name = "WallhopUI"
+screenGui.Name = "InfiniteJumpUI"
 screenGui.ResetOnSpawn = false
 
 local frame = Instance.new("Frame", screenGui)
@@ -31,7 +29,7 @@ frame.Draggable = true
 
 local titleLabel = Instance.new("TextLabel", frame)
 titleLabel.Size = UDim2.new(1, 0, 0.3, 0)
-titleLabel.Text = "Wallhop Script"
+titleLabel.Text = "Infinite Jump Script"
 titleLabel.TextSize = 16
 titleLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 titleLabel.TextColor3 = textColor
@@ -47,35 +45,16 @@ statusLabel.TextColor3 = textColor
 local toggleButton = Instance.new("TextButton", frame)
 toggleButton.Size = UDim2.new(1, 0, 0.4, 0)
 toggleButton.Position = UDim2.new(0, 0, 0.6, 0)
-toggleButton.Text = "Enable Wallhop"
+toggleButton.Text = "Enable Infinite Jump"
 toggleButton.TextSize = 16
 toggleButton.BackgroundColor3 = disabledColor
 toggleButton.TextColor3 = textColor
 
--- Variables for wallhop
-local wallhopEnabled = false
+-- Variables for infinite jump
+local infiniteJumpEnabled = false
 
--- Detect walls
-local function detectWall()
-    local character = LocalPlayer.Character
-    if not character then return nil end
-
-    local rootPart = character:FindFirstChild("HumanoidRootPart")
-    if not rootPart then return nil end
-
-    -- Raycast to detect walls
-    local rayParams = RaycastParams.new()
-    rayParams.FilterDescendantsInstances = {character}
-    rayParams.FilterType = Enum.RaycastFilterType.Blacklist
-
-    local rayDirection = rootPart.CFrame.LookVector * maxWallDistance
-    local rayResult = workspace:Raycast(rootPart.Position, rayDirection, rayParams)
-
-    return rayResult
-end
-
--- Perform wall hop or jump
-local function performWallHop()
+-- Perform a jump
+local function performJump()
     local character = LocalPlayer.Character
     if not character then return end
 
@@ -84,39 +63,30 @@ local function performWallHop()
 
     if humanoid and rootPart then
         humanoid:ChangeState(Enum.HumanoidStateType.Jumping) -- Trigger jump
-
-        -- Apply upward and sideways velocity
-        local wall = detectWall()
-        local sidewaysBoost = Vector3.new(0, 0, 0)
-
-        if wall then
-            local wallNormal = wall.Normal
-            sidewaysBoost = Vector3.new(wallNormal.X * sidewaysForce, 0, wallNormal.Z * sidewaysForce)
-        end
-
-        -- Apply controlled velocity
-        rootPart.Velocity = rootPart.Velocity + Vector3.new(0, upwardForce, 0) + sidewaysBoost
+        rootPart.Velocity = rootPart.Velocity + Vector3.new(0, upwardForce, 0) -- Apply upward force
     end
 end
 
 -- Handle jump input
 UserInputService.InputBegan:Connect(function(input, isProcessed)
-    if input.KeyCode == Enum.KeyCode.Space and wallhopEnabled and not isProcessed then
-        performWallHop() -- Perform the jump each time the button is pressed
+    if infiniteJumpEnabled and not isProcessed then
+        if input.KeyCode == Enum.KeyCode.Space then -- Desktop: Spacebar
+            performJump()
+        end
     end
 end)
 
 -- Mobile support for jump input
 UserInputService.TouchTap:Connect(function()
-    if wallhopEnabled then
-        performWallHop() -- Perform the jump each time the screen is tapped
+    if infiniteJumpEnabled then
+        performJump()
     end
 end)
 
--- Toggle wallhop functionality
+-- Toggle infinite jump functionality
 toggleButton.MouseButton1Click:Connect(function()
-    wallhopEnabled = not wallhopEnabled
-    toggleButton.Text = wallhopEnabled and "Disable Wallhop" or "Enable Wallhop"
-    toggleButton.BackgroundColor3 = wallhopEnabled and enabledColor or disabledColor
-    statusLabel.Text = wallhopEnabled and "Status: Enabled" or "Status: Disabled"
+    infiniteJumpEnabled = not infiniteJumpEnabled
+    toggleButton.Text = infiniteJumpEnabled and "Disable Infinite Jump" or "Enable Infinite Jump"
+    toggleButton.BackgroundColor3 = infiniteJumpEnabled and enabledColor or disabledColor
+    statusLabel.Text = infiniteJumpEnabled and "Status: Enabled" or "Status: Disabled"
 end)
