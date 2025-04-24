@@ -102,14 +102,14 @@ end
 -- Handle jump input
 UserInputService.InputBegan:Connect(function(input, isProcessed)
     if input.KeyCode == Enum.KeyCode.Space and wallhopEnabled and not isProcessed then
-        performWallHop() -- Perform the jump only when the button is pressed
+        performWallHop() -- Perform the jump each time the button is pressed
     end
 end)
 
 -- Mobile support for jump input
 UserInputService.TouchTap:Connect(function()
     if wallhopEnabled then
-        performWallHop() -- Perform the jump only when the screen is tapped
+        performWallHop() -- Perform the jump each time the screen is tapped
     end
 end)
 
