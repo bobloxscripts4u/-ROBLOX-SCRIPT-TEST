@@ -4,10 +4,10 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
--- Configuration
+-- Configuration for jump and wall hop
 local maxWallDistance = 4 -- Maximum distance to detect a wall
-local upwardForce = 50 -- Upward velocity for jumps
-local sidewaysForce = 15 -- Sideways velocity for wall hops
+local upwardForce = 30 -- Reduced upward velocity for controlled jumps
+local sidewaysForce = 10 -- Sideways velocity for realistic wall hops
 
 -- UI Colors
 local enabledColor = Color3.fromRGB(85, 255, 85) -- Green when enabled
@@ -96,6 +96,7 @@ local function performWallHop()
             sidewaysBoost = Vector3.new(wallNormal.X * sidewaysForce, 0, wallNormal.Z * sidewaysForce)
         end
 
+        -- Apply controlled velocity
         rootPart.Velocity = rootPart.Velocity + Vector3.new(0, upwardForce, 0) + sidewaysBoost
     end
 end
