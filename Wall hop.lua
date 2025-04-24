@@ -1,11 +1,13 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
 -- Configuration
 local maxStuds = 5 -- Maximum range in studs for wall hop to work
 local wallHopCooldown = 0.2 -- Cooldown in seconds between wall hops
+local jumpKey = Enum.KeyCode.Space -- Key to trigger wall hop
 
 -- UI Colors
 local buttonActiveColor = Color3.fromRGB(85, 255, 85) -- Green for active
@@ -64,7 +66,6 @@ button.BorderSizePixel = 0
 
 -- Wallhop logic
 local isWallhopEnabled = false
-local connection
 local lastWallHopTime = 0
 
 -- Function to check if player is touching a wall
@@ -86,27 +87,27 @@ local function isTouchingWall()
     return false
 end
 
--- Function to start wallhop
-local function startWallhop()
-    if not isWallhopEnabled then return end
-    connection = RunService.RenderStepped:Connect(function()
-        if isTouchingWall() and (tick() - lastWallHopTime > wallHopCooldown) then
-            local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            if humanoid and humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
-                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-                lastWallHopTime = tick()
-            end
-        end
-    end)
-end
+-- Wallhop movement logic
+local function performWallHop()
+    local character = LocalPlayer.Character
+    if not character then return end
 
--- Function to stop wallhop
-local function stopWallhop()
-    if connection then
-        connection:Disconnect()
-        connection = nil
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid and humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
     end
 end
+
+-- Detect jump key press for wallhop
+UserInputService.InputBegan:Connect(function(input, isProcessed)
+    if isProcessed then return end -- Ignore processed input
+    if input.KeyCode == jumpKey and isWallhopEnabled then
+        if tick() - lastWallHopTime > wallHopCooldown and isTouchingWall() then
+            performWallHop()
+            lastWallHopTime = tick()
+        end
+    end
+end)
 
 -- Button functionality to toggle wallhop
 button.MouseButton1Click:Connect(function()
@@ -115,11 +116,9 @@ button.MouseButton1Click:Connect(function()
         button.Text = "Disable Wallhop"
         button.BackgroundColor3 = buttonActiveColor
         statusLabel.Text = "Status: Enabled"
-        startWallhop()
     else
         button.Text = "Enable Wallhop"
         button.BackgroundColor3 = buttonInactiveColor
         statusLabel.Text = "Status: Disabled"
-        stopWallhop()
     end
 end)
