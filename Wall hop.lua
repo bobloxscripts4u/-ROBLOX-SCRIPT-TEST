@@ -1,14 +1,12 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
 -- Configuration for jump and wall hop
 local maxWallDistance = 4 -- Maximum distance to detect a wall
-local upwardForce = 20 -- Further reduced upward velocity for controlled jumps
-local sidewaysForce = 8 -- Lowered sideways velocity for smoother wall hops
-local jumpDelay = 1 -- Delay (in seconds) between jumps to prevent flying
+local upwardForce = 30 -- Adjusted upward velocity for controlled jumps
+local sidewaysForce = 10 -- Sideways velocity for realistic wall hops
 
 -- UI Colors
 local enabledColor = Color3.fromRGB(85, 255, 85) -- Green when enabled
@@ -54,10 +52,9 @@ toggleButton.TextSize = 16
 toggleButton.BackgroundColor3 = disabledColor
 toggleButton.TextColor3 = textColor
 
--- Variables for wallhop and infinite jump
+-- Variables for wallhop and jump tracking
 local wallhopEnabled = false
-local infiniteJumping = false
-local lastJumpTime = 0 -- Track the last jump time
+local jumpQueue = 0 -- Tracks how many jumps should occur
 
 -- Detect walls
 local function detectWall()
@@ -78,13 +75,10 @@ local function detectWall()
     return rayResult
 end
 
--- Perform realistic wall hop
+-- Perform wall hop or jump
 local function performWallHop()
-    local currentTime = tick()
-    if currentTime - lastJumpTime < jumpDelay then return end -- Add delay before the next jump
-
     local character = LocalPlayer.Character
-    if not character then return end
+    if not character or jumpQueue <= 0 then return end
 
     local rootPart = character:FindFirstChild("HumanoidRootPart")
     local humanoid = character:FindFirstChildOfClass("Humanoid")
@@ -103,35 +97,23 @@ local function performWallHop()
 
         -- Apply controlled velocity
         rootPart.Velocity = rootPart.Velocity + Vector3.new(0, upwardForce, 0) + sidewaysBoost
-        lastJumpTime = currentTime -- Update the last jump time
+        jumpQueue = jumpQueue - 1 -- Decrease the jump queue by 1
     end
 end
 
--- Infinite jump loop
-local function startInfiniteJump()
-    infiniteJumping = true
-    RunService.RenderStepped:Connect(function()
-        if infiniteJumping then
-            performWallHop()
-        end
-    end)
-end
-
-local function stopInfiniteJump()
-    infiniteJumping = false
-end
-
--- Mobile support for wallhop (touch)
-UserInputService.TouchTap:Connect(function()
-    if wallhopEnabled then
-        performWallHop()
+-- Handle jump input
+UserInputService.InputBegan:Connect(function(input, isProcessed)
+    if input.KeyCode == Enum.KeyCode.Space and wallhopEnabled and not isProcessed then
+        jumpQueue = jumpQueue + 1 -- Add a jump to the queue
+        performWallHop() -- Perform the jump immediately
     end
 end)
 
--- Desktop support for wallhop (spacebar)
-UserInputService.InputBegan:Connect(function(input, isProcessed)
-    if input.KeyCode == Enum.KeyCode.Space and wallhopEnabled and not isProcessed then
-        performWallHop()
+-- Mobile support for jump input
+UserInputService.TouchTap:Connect(function()
+    if wallhopEnabled then
+        jumpQueue = jumpQueue + 1 -- Add a jump to the queue
+        performWallHop() -- Perform the jump immediately
     end
 end)
 
@@ -141,11 +123,4 @@ toggleButton.MouseButton1Click:Connect(function()
     toggleButton.Text = wallhopEnabled and "Disable Wallhop" or "Enable Wallhop"
     toggleButton.BackgroundColor3 = wallhopEnabled and enabledColor or disabledColor
     statusLabel.Text = wallhopEnabled and "Status: Enabled" or "Status: Disabled"
-
-    -- Start or stop infinite jumping
-    if wallhopEnabled then
-        startInfiniteJump()
-    else
-        stopInfiniteJump()
-    end
 end)
