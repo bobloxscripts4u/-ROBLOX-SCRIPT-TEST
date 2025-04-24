@@ -6,8 +6,8 @@ local CoreGui = game:GetService("CoreGui")
 
 -- Configuration for jump and wall hop
 local maxWallDistance = 4 -- Maximum distance to detect a wall
-local upwardForce = 30 -- Reduced upward velocity for controlled jumps
-local sidewaysForce = 10 -- Sideways velocity for realistic wall hops
+local upwardForce = 20 -- Further reduced upward velocity for controlled jumps
+local sidewaysForce = 8 -- Lowered sideways velocity for smoother wall hops
 local jumpDelay = 1 -- Delay (in seconds) between jumps to prevent flying
 
 -- UI Colors
@@ -81,7 +81,7 @@ end
 -- Perform realistic wall hop
 local function performWallHop()
     local currentTime = tick()
-    if currentTime - lastJumpTime < jumpDelay then return end -- Add delay before next jump
+    if currentTime - lastJumpTime < jumpDelay then return end -- Add delay before the next jump
 
     local character = LocalPlayer.Character
     if not character then return end
