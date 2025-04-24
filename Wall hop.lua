@@ -53,8 +53,9 @@ toggleButton.TextSize = 16
 toggleButton.BackgroundColor3 = disabledColor
 toggleButton.TextColor3 = textColor
 
--- Wallhop logic
+-- Variables for wallhop and infinite jump
 local wallhopEnabled = false
+local infiniteJumping = false
 
 -- Detect walls
 local function detectWall()
@@ -99,22 +100,31 @@ local function performWallHop()
     end
 end
 
--- Infinite jump and wall hop trigger
-local function onJump()
+-- Infinite jump loop
+local function startInfiniteJump()
+    infiniteJumping = true
+    RunService.RenderStepped:Connect(function()
+        if infiniteJumping then
+            performWallHop()
+        end
+    end)
+end
+
+local function stopInfiniteJump()
+    infiniteJumping = false
+end
+
+-- Mobile support for wallhop (touch)
+UserInputService.TouchTap:Connect(function()
     if wallhopEnabled then
         performWallHop()
     end
-end
-
--- Mobile support for jumping
-UserInputService.TouchTap:Connect(function()
-    onJump()
 end)
 
--- Desktop support for jumping
+-- Desktop support for wallhop (spacebar)
 UserInputService.InputBegan:Connect(function(input, isProcessed)
     if input.KeyCode == Enum.KeyCode.Space and wallhopEnabled and not isProcessed then
-        onJump()
+        performWallHop()
     end
 end)
 
@@ -124,4 +134,11 @@ toggleButton.MouseButton1Click:Connect(function()
     toggleButton.Text = wallhopEnabled and "Disable Wallhop" or "Enable Wallhop"
     toggleButton.BackgroundColor3 = wallhopEnabled and enabledColor or disabledColor
     statusLabel.Text = wallhopEnabled and "Status: Enabled" or "Status: Disabled"
+
+    -- Start or stop infinite jumping
+    if wallhopEnabled then
+        startInfiniteJump()
+    else
+        stopInfiniteJump()
+    end
 end)
