@@ -5,13 +5,14 @@ local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
 -- Configuration
-local maxStuds = 5 -- Maximum range for wall detection
-local wallHopCooldown = 0.2 -- Cooldown between wall hops (seconds)
+local maxStuds = 4 -- Maximum range for wall detection
+local jumpForce = 50 -- Upward force for wall hops
+local sidewaysForce = 15 -- Sideways force for realistic wall hop
 local jumpKey = Enum.KeyCode.Space -- Key for jumping
 
 -- UI Colors
-local buttonActiveColor = Color3.fromRGB(85, 255, 85) -- Green (wall hop enabled)
-local buttonInactiveColor = Color3.fromRGB(255, 85, 85) -- Red (wall hop disabled)
+local buttonActiveColor = Color3.fromRGB(85, 255, 85) -- Green (enabled)
+local buttonInactiveColor = Color3.fromRGB(255, 85, 85) -- Red (disabled)
 local textColor = Color3.fromRGB(255, 255, 255) -- Text color
 
 -- Remove old UI if it exists
@@ -55,9 +56,8 @@ button.TextColor3 = textColor
 
 -- Wall hop logic
 local isWallhopEnabled = false
-local lastWallHopTime = 0
 
--- Function to check for walls
+-- Function to detect walls
 local function isTouchingWall()
     local character = LocalPlayer.Character
     if not character then return false end
@@ -71,10 +71,10 @@ local function isTouchingWall()
     rayParams.FilterType = Enum.RaycastFilterType.Blacklist
 
     local rayResult = workspace:Raycast(root.Position, root.CFrame.LookVector * maxStuds, rayParams)
-    return rayResult and rayResult.Instance
+    return rayResult
 end
 
--- Perform wall hop
+-- Perform realistic wall hop
 local function performWallHop()
     local character = LocalPlayer.Character
     if not character then return end
@@ -83,22 +83,28 @@ local function performWallHop()
     local rootPart = character:FindFirstChild("HumanoidRootPart")
 
     if humanoid and rootPart then
+        -- Apply upward and sideways velocity
+        local wallDetection = isTouchingWall()
+        local sidewaysBoost = Vector3.new(sidewaysForce, 0, 0)
+
+        if wallDetection then
+            local normal = wallDetection.Normal
+            sidewaysBoost = Vector3.new(normal.X * sidewaysForce, 0, normal.Z * sidewaysForce)
+        end
+
         humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-        rootPart.Velocity = rootPart.Velocity + Vector3.new(0, 50, 0) -- Upward boost for wall hop
+        rootPart.Velocity = rootPart.Velocity + Vector3.new(0, jumpForce, 0) + sidewaysBoost
     end
 end
 
--- Detect jump input
+-- Infinite jump and wall hop functionality
 UserInputService.InputBegan:Connect(function(input, isProcessed)
     if input.KeyCode == jumpKey and isWallhopEnabled and not isProcessed then
-        if tick() - lastWallHopTime > wallHopCooldown and isTouchingWall() then
-            performWallHop()
-            lastWallHopTime = tick()
-        end
+        performWallHop()
     end
 end)
 
--- Toggle wall hop
+-- Button functionality to toggle wallhop
 button.MouseButton1Click:Connect(function()
     isWallhopEnabled = not isWallhopEnabled
     button.Text = isWallhopEnabled and "Disable Wallhop" or "Enable Wallhop"
