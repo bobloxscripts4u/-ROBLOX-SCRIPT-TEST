@@ -29,42 +29,44 @@ local isWallhopEnabled = false
 local connection
 
 local function isTouchingWall()
-	local character = LocalPlayer.Character
-	if not character then return false end
+    local character = LocalPlayer.Character
+    if not character then return false end
 
-	local root = character:FindFirstChild("HumanoidRootPart")
-	if not root then return false end
+    local root = character:FindFirstChild("HumanoidRootPart")
+    if not root then return false end
 
-	local ray = Ray.new(root.Position, root.CFrame.LookVector * 2)
-	local part = workspace:FindPartOnRay(ray, character)
-	return part and not part:IsDescendantOf(character)
+    local ray = Ray.new(root.Position, root.CFrame.LookVector * 2)
+    local part = workspace:FindPartOnRay(ray, character)
+    return part and not part:IsDescendantOf(character)
 end
 
 local function startWallhop()
-	connection = RunService.RenderStepped:Connect(function()
-		if isTouchingWall() then
-			local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-			if humanoid and humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
-				humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-			end
-		end
-	end)
+    if not isWallhopEnabled then return end -- Ensure we don't start wallhop when it's disabled
+    connection = RunService.RenderStepped:Connect(function()
+        if isTouchingWall() then
+            local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid and humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end
+    end)
 end
 
 local function stopWallhop()
-	if connection then
-		connection:Disconnect()
-		connection = nil
-	end
+    if connection then
+        connection:Disconnect()
+        connection = nil
+    end
 end
 
+-- Toggle button functionality
 button.MouseButton1Click:Connect(function()
-	isWallhopEnabled = not isWallhopEnabled
-	if isWallhopEnabled then
-		button.Text = "Wallhop On"
-		startWallhop()
-	else
-		button.Text = "Walking"
-		stopWallhop()
-	end
+    isWallhopEnabled = not isWallhopEnabled
+    if isWallhopEnabled then
+        button.Text = "Wallhop On"
+        startWallhop()
+    else
+        button.Text = "Walking"
+        stopWallhop()
+    end
 end)
