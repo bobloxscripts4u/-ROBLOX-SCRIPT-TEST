@@ -27,6 +27,7 @@ button.Draggable = true
 -- Wallhop logic
 local isWallhopEnabled = false
 local connection
+local maxStuds = 5 -- Maximum range in studs for the wall hop to work
 
 local function isTouchingWall()
     local character = LocalPlayer.Character
@@ -35,13 +36,21 @@ local function isTouchingWall()
     local root = character:FindFirstChild("HumanoidRootPart")
     if not root then return false end
 
-    local ray = Ray.new(root.Position, root.CFrame.LookVector * 2)
-    local part = workspace:FindPartOnRay(ray, character)
-    return part and not part:IsDescendantOf(character)
+    -- Cast a ray to detect walls within maxStuds
+    local ray = Ray.new(root.Position, root.CFrame.LookVector * maxStuds)
+    local part, position = workspace:FindPartOnRay(ray, character)
+
+    -- Check if the part exists and is within the max distance
+    if part and not part:IsDescendantOf(character) then
+        local distance = (position - root.Position).Magnitude
+        return distance <= maxStuds
+    end
+
+    return false
 end
 
 local function startWallhop()
-    if not isWallhopEnabled then return end -- Ensure we don't start wallhop when it's disabled
+    if not isWallhopEnabled then return end -- Ensure wallhop only works when enabled
     connection = RunService.RenderStepped:Connect(function()
         if isTouchingWall() then
             local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
