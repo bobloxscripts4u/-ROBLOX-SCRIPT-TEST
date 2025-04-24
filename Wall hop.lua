@@ -5,16 +5,16 @@ local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
 -- Configuration
-local maxStuds = 5
-local wallHopCooldown = 0.2
-local jumpKey = Enum.KeyCode.Space
+local maxStuds = 5 -- Maximum range for wall detection
+local wallHopCooldown = 0.2 -- Cooldown between wall hops (seconds)
+local jumpKey = Enum.KeyCode.Space -- Key for jumping
 
 -- UI Colors
-local buttonActiveColor = Color3.fromRGB(85, 255, 85)
-local buttonInactiveColor = Color3.fromRGB(255, 85, 85)
-local textColor = Color3.fromRGB(255, 255, 255)
+local buttonActiveColor = Color3.fromRGB(85, 255, 85) -- Green (wall hop enabled)
+local buttonInactiveColor = Color3.fromRGB(255, 85, 85) -- Red (wall hop disabled)
+local textColor = Color3.fromRGB(255, 255, 255) -- Text color
 
--- Remove old UI
+-- Remove old UI if it exists
 pcall(function() CoreGui:FindFirstChild("WallhopUI"):Destroy() end)
 
 -- Create UI
@@ -53,10 +53,11 @@ button.TextSize = 16
 button.BackgroundColor3 = buttonInactiveColor
 button.TextColor3 = textColor
 
--- Wallhop logic
+-- Wall hop logic
 local isWallhopEnabled = false
 local lastWallHopTime = 0
 
+-- Function to check for walls
 local function isTouchingWall()
     local character = LocalPlayer.Character
     if not character then return false end
@@ -64,6 +65,7 @@ local function isTouchingWall()
     local root = character:FindFirstChild("HumanoidRootPart")
     if not root then return false end
 
+    -- Raycast for wall detection
     local rayParams = RaycastParams.new()
     rayParams.FilterDescendantsInstances = {character}
     rayParams.FilterType = Enum.RaycastFilterType.Blacklist
@@ -72,6 +74,7 @@ local function isTouchingWall()
     return rayResult and rayResult.Instance
 end
 
+-- Perform wall hop
 local function performWallHop()
     local character = LocalPlayer.Character
     if not character then return end
@@ -81,10 +84,11 @@ local function performWallHop()
 
     if humanoid and rootPart then
         humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-        rootPart.Velocity = rootPart.Velocity + Vector3.new(0, 50, 0)
+        rootPart.Velocity = rootPart.Velocity + Vector3.new(0, 50, 0) -- Upward boost for wall hop
     end
 end
 
+-- Detect jump input
 UserInputService.InputBegan:Connect(function(input, isProcessed)
     if input.KeyCode == jumpKey and isWallhopEnabled and not isProcessed then
         if tick() - lastWallHopTime > wallHopCooldown and isTouchingWall() then
@@ -94,6 +98,7 @@ UserInputService.InputBegan:Connect(function(input, isProcessed)
     end
 end)
 
+-- Toggle wall hop
 button.MouseButton1Click:Connect(function()
     isWallhopEnabled = not isWallhopEnabled
     button.Text = isWallhopEnabled and "Disable Wallhop" or "Enable Wallhop"
