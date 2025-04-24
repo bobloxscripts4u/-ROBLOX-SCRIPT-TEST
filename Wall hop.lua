@@ -1,85 +1,68 @@
+-- No Cooldown Tool Bypass + Floating UI Toggle | Delta-Compatible
+
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
+local lp = Players.LocalPlayer
+local char = lp.Character or lp.CharacterAdded:Wait()
 
 -- Create UI
 local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Name = "FlingUI"
+gui.Name = "CooldownBypassMenu"
 
-local button = Instance.new("TextButton", gui)
-button.Size = UDim2.new(0, 120, 0, 40)
-button.Position = UDim2.new(0.02, 0, 0.4, 0)
-button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-button.TextColor3 = Color3.fromRGB(255, 255, 255)
-button.Text = "Fling: OFF"
-button.TextScaled = true
-button.Draggable = true
-button.Active = true
+local btn = Instance.new("TextButton", gui)
+btn.Size = UDim2.new(0, 100, 0, 40)
+btn.Position = UDim2.new(0.01, 0, 0.45, 0)
+btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+btn.Text = "No Cooldown: OFF"
+btn.Active = true
+btn.Draggable = true
 
--- Create fling block
-local flingBlock = Instance.new("Part")
-flingBlock.Size = Vector3.new(4, 4, 4)
-flingBlock.Shape = Enum.PartType.Block
-flingBlock.Color = Color3.fromRGB(255, 0, 0)
-flingBlock.Material = Enum.Material.Neon
-flingBlock.Transparency = 0.3
-flingBlock.Anchored = false
-flingBlock.CanCollide = false
-flingBlock.Massless = true
-flingBlock.Name = "FlingBlock"
-flingBlock.Parent = workspace
+-- Main Logic
+local noCooldownEnabled = false
+local toolConnections = {}
 
--- Attach to player
-local attachPart = character:WaitForChild("HumanoidRootPart")
-local weld = Instance.new("WeldConstraint")
-weld.Part0 = flingBlock
-weld.Part1 = attachPart
-weld.Parent = flingBlock
-flingBlock.CFrame = attachPart.CFrame * CFrame.new(0, 0, -3)
+function enableCooldownBypass(tool)
+    if not tool:IsA("Tool") then return end
+    if toolConnections[tool] then return end
 
--- Fling logic
-local flingEnabled = false
+    for _, v in pairs(tool:GetDescendants()) do
+        if v:IsA("Script") or v:IsA("LocalScript") then
+            v.Disabled = true
+        end
+    end
 
-local function updateFling()
-	if flingEnabled then
-		button.Text = "Fling: ON"
-	else
-		button.Text = "Fling: OFF"
-	end
+    local con = tool.Activated:Connect(function()
+        if noCooldownEnabled then
+            local fire = tool:FindFirstChild("RemoteEvent") or tool:FindFirstChildWhichIsA("RemoteEvent", true)
+            if fire then
+                for i = 1, 3 do
+                    fire:FireServer()
+                    task.wait(0.05)
+                end
+            end
+        end
+    end)
+    toolConnections[tool] = con
 end
 
--- Toggle button click
-button.MouseButton1Click:Connect(function()
-	flingEnabled = not flingEnabled
-	updateFling()
-end)
+function setupTools()
+    for _, tool in ipairs(lp.Backpack:GetChildren()) do
+        enableCooldownBypass(tool)
+    end
+    for _, tool in ipairs(char:GetChildren()) do
+        enableCooldownBypass(tool)
+    end
+end
 
--- Constant flinging loop
-RunService.RenderStepped:Connect(function()
-	if flingEnabled then
-		pcall(function()
-			flingBlock.Velocity = Vector3.new(
-				math.random(-5000, 5000),
-				math.random(-5000, 5000),
-				math.random(-5000, 5000)
-			)
-		end)
-	else
-		flingBlock.Velocity = Vector3.zero
-	end
-end)
+-- Monitor for new tools
+lp.Backpack.ChildAdded:Connect(enableCooldownBypass)
+char.ChildAdded:Connect(enableCooldownBypass)
 
--- Fling touch
-flingBlock.Touched:Connect(function(hit)
-	if not flingEnabled then return end
-	local char = hit:FindFirstAncestorOfClass("Model")
-	if char and char:FindFirstChild("Humanoid") and char ~= character then
-		local root = char:FindFirstChild("HumanoidRootPart")
-		if root then
-			root.Velocity = Vector3.new(9999, 9999, 9999)
-		end
-	end
+-- Button toggle
+btn.MouseButton1Click:Connect(function()
+    noCooldownEnabled = not noCooldownEnabled
+    btn.Text = noCooldownEnabled and "No Cooldown: ON" or "No Cooldown: OFF"
+    if noCooldownEnabled then
+        setupTools()
+    end
 end)
-
-updateFling()
