@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -42,21 +43,47 @@
       border-radius: 8px;
       display: none;
     }
+    #copyBtn {
+      padding: 8px 16px;
+      margin-top: 10px;
+      background-color: #28a745;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #copyBtn:disabled {
+      background-color: gray;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Watch this video to unlock your key</h2>
-    <iframe width="300" height="180" src="https://www.youtube.com/embed/EMbkNxBusgA?autoplay=0" frameborder="0" allowfullscreen></iframe>
+    <iframe width="300" height="180" id="video" src="https://www.youtube.com/embed/EMbkNxBusgA?autoplay=0" frameborder="0" allowfullscreen></iframe>
     <p id="timer">Please wait 30 seconds...</p>
     <button id="revealBtn" disabled>Reveal Key</button>
     <div id="keyBox">YOUR-16-LETTER-KEY</div>
-  </div>  <script>
+    <button id="copyBtn" disabled>Copy Key</button>
+  </div>
+
+  <script>
     let secondsLeft = 30;
     const timer = document.getElementById("timer");
     const revealBtn = document.getElementById("revealBtn");
     const keyBox = document.getElementById("keyBox");
+    const copyBtn = document.getElementById("copyBtn");
+    const video = document.getElementById("video");
 
+    // Video interaction handler
+    video.addEventListener('play', () => {
+      if (secondsLeft > 0) {
+        secondsLeft = 30; // Reset countdown when video starts
+        timer.textContent = `Please wait ${secondsLeft} seconds...`;
+      }
+    });
+
+    // Countdown logic
     const interval = setInterval(() => {
       secondsLeft--;
       timer.textContent = `Please wait ${secondsLeft} seconds...`;
@@ -67,9 +94,23 @@
       }
     }, 1000);
 
+    // Reveal key when button is clicked
     revealBtn.addEventListener("click", () => {
       keyBox.style.display = "block";
       keyBox.textContent = "S1LLYB4TTLEGROUND"; // <-- Replace with your custom 16-letter key
+      copyBtn.disabled = false; // Enable copy button
     });
-  </script></body>
+
+    // Copy the key to clipboard
+    copyBtn.addEventListener("click", () => {
+      const textArea = document.createElement("textarea");
+      textArea.value = keyBox.textContent;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      alert("Key copied to clipboard!");
+    });
+  </script>
+</body>
 </html>
