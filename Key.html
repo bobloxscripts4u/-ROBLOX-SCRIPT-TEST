@@ -59,8 +59,8 @@
 </head>
 <body>
   <div class="container">
-    <h2>Watch this video to unlock your key</h2>
-    <iframe width="300" height="180" id="video" src="https://www.youtube.com/embed/EMbkNxBusgA?autoplay=1" frameborder="0" allowfullscreen></iframe>
+    <h2>Click the button to watch the video and unlock your key</h2>
+    <button id="watchBtn">Watch Video</button>
     <p id="timer">Please wait 30 seconds...</p>
     <button id="revealBtn" disabled>Reveal Key</button>
     <div id="keyBox">YOUR-16-LETTER-KEY</div>
@@ -74,17 +74,18 @@
     const revealBtn = document.getElementById("revealBtn");
     const keyBox = document.getElementById("keyBox");
     const copyBtn = document.getElementById("copyBtn");
-    const video = document.getElementById("video");
+    const watchBtn = document.getElementById("watchBtn");
 
-    // Start countdown when the video starts playing
-    video.addEventListener('play', function () {
-      if (!countdownStarted) {
-        countdownStarted = true; // Set to true to start the countdown once
-        startCountdown();
-      }
+    // When the user clicks the button, the countdown starts
+    watchBtn.addEventListener('click', function() {
+      // Start the countdown
+      startCountdown();
+      
+      // Redirect the user to the YouTube video
+      window.location.href = "https://youtu.be/EMbkNxBusgA?si=ohOXsjUZ7TEmsNEq";  // Replace with your video URL
     });
 
-    // Countdown function
+    // Start the countdown function
     function startCountdown() {
       const interval = setInterval(() => {
         secondsLeft--;
@@ -92,7 +93,7 @@
         if (secondsLeft <= 0) {
           clearInterval(interval);
           timer.textContent = "You can now reveal the key.";
-          revealBtn.disabled = false;  // Enable reveal button
+          revealBtn.disabled = false;  // Enable the reveal button
         }
       }, 1000);
     }
@@ -104,7 +105,7 @@
       copyBtn.disabled = false;  // Enable copy button
     });
 
-    // Copy key button functionality
+    // Copy key functionality
     copyBtn.addEventListener("click", () => {
       const textArea = document.createElement("textarea");
       textArea.value = keyBox.textContent;
