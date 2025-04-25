@@ -35,15 +35,6 @@
     button:disabled {
       background-color: gray;
     }
-    #adContainer {
-      margin-top: 20px;
-      width: 300px;
-      height: 250px;
-      background-color: #333;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-      margin-bottom: 20px;
-    }
     #keyBox {
       margin-top: 20px;
       background: #000;
@@ -68,13 +59,8 @@
 </head>
 <body>
   <div class="container">
-    <h2>Watch this ad to unlock your key</h2>
-    
-    <!-- Placeholder for an ad -->
-    <div id="adContainer">
-      <iframe src="https://youtu.be/EMbkNxBusgA?si=-Tb_pb_-8yGvHOHc" width="100%" height="100%" frameborder="0"></iframe>
-    </div>
-
+    <h2>Click the button to watch the video and unlock your key</h2>
+    <button id="watchBtn">Watch Video</button>
     <p id="timer">Please wait 30 seconds...</p>
     <button id="revealBtn" disabled>Reveal Key</button>
     <div id="keyBox">YOUR-16-LETTER-KEY</div>
@@ -88,15 +74,18 @@
     const revealBtn = document.getElementById("revealBtn");
     const keyBox = document.getElementById("keyBox");
     const copyBtn = document.getElementById("copyBtn");
-    const adContainer = document.getElementById("adContainer");
+    const watchBtn = document.getElementById("watchBtn");
 
-    // Start countdown after the user has viewed the ad
-    adContainer.addEventListener('click', function() {
-      startCountdown(); // Start countdown after the ad click
-      adContainer.style.display = 'none'; // Hide the ad after interaction
+    // When the user clicks the button, the countdown starts
+    watchBtn.addEventListener('click', function() {
+      // Start the countdown
+      startCountdown();
+      
+      // Redirect the user to the YouTube video
+      window.location.href = "https://youtu.be/EMbkNxBusgA?si=ohOXsjUZ7TEmsNEq";  // Replace with your video URL
     });
 
-    // Countdown function
+    // Start the countdown function
     function startCountdown() {
       const interval = setInterval(() => {
         secondsLeft--;
