@@ -69,22 +69,22 @@
 
   <script>
     let secondsLeft = 30;
+    let countdownStarted = false;
     const timer = document.getElementById("timer");
     const revealBtn = document.getElementById("revealBtn");
     const keyBox = document.getElementById("keyBox");
     const copyBtn = document.getElementById("copyBtn");
     const video = document.getElementById("video");
 
-    // Start countdown after video is played
-    let videoStarted = false;
+    // Video play interaction to start the countdown
     video.addEventListener('play', () => {
-      if (!videoStarted) {
-        videoStarted = true; // Mark the video as started
+      if (!countdownStarted) {
+        countdownStarted = true;
         startCountdown();
       }
     });
 
-    // Countdown function
+    // Start the countdown
     function startCountdown() {
       const interval = setInterval(() => {
         secondsLeft--;
@@ -92,19 +92,19 @@
         if (secondsLeft <= 0) {
           clearInterval(interval);
           timer.textContent = "You can now reveal the key.";
-          revealBtn.disabled = false;
+          revealBtn.disabled = false;  // Enable reveal button
         }
       }, 1000);
     }
 
-    // Reveal key button
+    // Reveal the key and enable the copy button
     revealBtn.addEventListener("click", () => {
       keyBox.style.display = "block";
-      keyBox.textContent = "S1LLYB4TTLEGROUND"; // <-- Replace with your custom 16-letter key
-      copyBtn.disabled = false; // Enable copy button
+      keyBox.textContent = "S1LLYB4TTLEGROUND"; // Replace with your custom key
+      copyBtn.disabled = false;  // Enable the copy button
     });
 
-    // Copy key button functionality
+    // Copy the key to clipboard
     copyBtn.addEventListener("click", () => {
       const textArea = document.createElement("textarea");
       textArea.value = keyBox.textContent;
