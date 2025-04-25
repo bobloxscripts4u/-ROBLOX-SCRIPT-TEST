@@ -1,0 +1,75 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Key Access Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1f1f1f;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+    .container {
+      background: #2c2c2c;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+    button:disabled {
+      background-color: gray;
+    }
+    #keyBox {
+      margin-top: 20px;
+      background: #000;
+      padding: 10px;
+      font-size: 18px;
+      border-radius: 8px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Watch this video to unlock your key</h2>
+    <iframe width="300" height="180" src="https://www.youtube.com/embed/EMbkNxBusgA?autoplay=0" frameborder="0" allowfullscreen></iframe>
+    <p id="timer">Please wait 30 seconds...</p>
+    <button id="revealBtn" disabled>Reveal Key</button>
+    <div id="keyBox">YOUR-16-LETTER-KEY</div>
+  </div>  <script>
+    let secondsLeft = 30;
+    const timer = document.getElementById("timer");
+    const revealBtn = document.getElementById("revealBtn");
+    const keyBox = document.getElementById("keyBox");
+
+    const interval = setInterval(() => {
+      secondsLeft--;
+      timer.textContent = `Please wait ${secondsLeft} seconds...`;
+      if (secondsLeft <= 0) {
+        clearInterval(interval);
+        timer.textContent = "You can now reveal the key.";
+        revealBtn.disabled = false;
+      }
+    }, 1000);
+
+    revealBtn.addEventListener("click", () => {
+      keyBox.style.display = "block";
+      keyBox.textContent = "S1LLYB4TTLEGROUND"; // <-- Replace with your custom 16-letter key
+    });
+  </script></body>
+</html>
