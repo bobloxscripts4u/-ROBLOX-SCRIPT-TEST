@@ -60,7 +60,7 @@
 <body>
   <div class="container">
     <h2>Watch this video to unlock your key</h2>
-    <iframe width="300" height="180" id="video" src="https://www.youtube.com/embed/EMbkNxBusgA?autoplay=0" frameborder="0" allowfullscreen></iframe>
+    <iframe width="300" height="180" id="video" src="https://www.youtube.com/embed/EMbkNxBusgA?autoplay=1" frameborder="0" allowfullscreen></iframe>
     <p id="timer">Please wait 30 seconds...</p>
     <button id="revealBtn" disabled>Reveal Key</button>
     <div id="keyBox">YOUR-16-LETTER-KEY</div>
@@ -76,15 +76,15 @@
     const copyBtn = document.getElementById("copyBtn");
     const video = document.getElementById("video");
 
-    // Video play interaction to start the countdown
-    video.addEventListener('play', () => {
+    // Start countdown when the video starts playing
+    video.addEventListener('play', function () {
       if (!countdownStarted) {
-        countdownStarted = true;
+        countdownStarted = true; // Set to true to start the countdown once
         startCountdown();
       }
     });
 
-    // Start the countdown
+    // Countdown function
     function startCountdown() {
       const interval = setInterval(() => {
         secondsLeft--;
@@ -97,14 +97,14 @@
       }, 1000);
     }
 
-    // Reveal the key and enable the copy button
+    // Reveal key button
     revealBtn.addEventListener("click", () => {
       keyBox.style.display = "block";
       keyBox.textContent = "S1LLYB4TTLEGROUND"; // Replace with your custom key
-      copyBtn.disabled = false;  // Enable the copy button
+      copyBtn.disabled = false;  // Enable copy button
     });
 
-    // Copy the key to clipboard
+    // Copy key button functionality
     copyBtn.addEventListener("click", () => {
       const textArea = document.createElement("textarea");
       textArea.value = keyBox.textContent;
